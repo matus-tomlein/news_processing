@@ -64,7 +64,7 @@ func CreateOrUpdateDatabase(pageId int, updates []int, ads *AdsFiltering, envTyp
 				fmt.Println("Recovered in update", r)
 			}
 		}()
-		// tutu
+
 		resp, err := http.Get(environment.UpdateJsonPath(updateId, envType))
 		if err != nil {
 			fmt.Println(err)
@@ -80,7 +80,8 @@ func CreateOrUpdateDatabase(pageId int, updates []int, ads *AdsFiltering, envTyp
 		root := UpdateRoot{}
 		err = json.Unmarshal(content, &root)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			continue
 		}
 		if root.PageId != pageId { // Check if the update is the same page as requested in func arguments
 			continue

@@ -24,8 +24,8 @@ func PageDbPath(pageId int, envType string) (string) {
 	return fmt.Sprintf("%s/databases/page_%d.db", cachePath(envType), pageId)
 }
 
-func UpdateJsonPath(updateId int, envType string) (string) {
-	return fmt.Sprintf("%s/links/%d.json", cachePath(envType), updateId)
+func UpdateJsonPath(pageId int, cacheFolderName string, envType string) (string) {
+	return fmt.Sprintf("%s/parsed/%d/%s.json", cachePath(envType), pageId, cacheFolderName)
 }
 
 func AdsFilteringTxtPath(envType string) (string) {

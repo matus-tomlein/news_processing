@@ -1,12 +1,21 @@
 package main
 
-import (
-	"github.com/matus-tomlein/news_processing/page_db"
-)
+import "fmt"
+
+func readInput(messages chan string) {
+	fmt.Println("Type q to quit")
+	for {
+		var input string
+		_, err := fmt.Scanf("%s", &input)
+		if err != nil { panic(err) }
+		messages <- input
+	}
+}
 
 func main() {
-	envType = "test"
-	ld := page_db.NewLinkDensity(700, envType)
-	page_db.CreateDatabase(700, []int{717, 10995, 105185, 109233, 109332, 111329}, envType)
-	ld.Update(700, []int{717, 10995, 105185, 109233, 109332, 111329}, envType)
+	messages := make(chan string)
+	go readInput(messages)
+
+	envType := "test"
+	processLinks(envType, messages)
 }

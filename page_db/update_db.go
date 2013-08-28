@@ -43,10 +43,10 @@ func GetDatabase(pageId int, envType string) (*sql.DB, error) {
 	return sql.Open("sqlite3", filename)
 }
 
-func CreateDatabase(pageId int, updates []int, envType string) {
+func CreateOrUpdateDatabase(pageId int, updates []int, ads *AdsFiltering, envType string) {
 	defer func() {
         if r := recover(); r != nil {
-            fmt.Println("Recovered in CreateDatabase", r)
+            fmt.Println("Recovered in CreateOrUpdateDatabase", r)
         }
     }()
 
@@ -56,9 +56,6 @@ func CreateDatabase(pageId int, updates []int, envType string) {
 	}
 	defer db.Close()
 	pageDomain := ""
-
-	var ads AdsFiltering
-	ads.Init(envType)
 
 	for _, updateId := range updates {
 		defer func() {

@@ -36,14 +36,14 @@ func NewLinkDensity(pageId int, envType string) *LinkDensity {
 	return ld
 }
 
-func (ld *LinkDensity) Update(pageId int, allUpdates []int, envType string) {
+func (ld *LinkDensity) Update(pageId int, allUpdates []int, envType string) (updates []int) {
 	defer func() {
         if r := recover(); r != nil {
             fmt.Println("Recovered in Update", r)
         }
     }()
 
-	updates := make([]int, 0)
+	updates = make([]int, 0)
 	for _, updateId := range allUpdates {
 		if (!contains(ld.Updates, updateId)) {
 			updates = append(updates, updateId)
@@ -72,6 +72,7 @@ func (ld *LinkDensity) Update(pageId int, allUpdates []int, envType string) {
 		panic(err)
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var top, left, height, width float64
 		rows.Scan(&top, &left, &height, &width)
@@ -93,6 +94,7 @@ func (ld *LinkDensity) Update(pageId int, allUpdates []int, envType string) {
 		}
 	}
 	ld.save(pageId, envType)
+	return
 }
 
 func (ld *LinkDensity) save(pageId int, envType string) {

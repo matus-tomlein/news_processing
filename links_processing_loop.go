@@ -113,7 +113,7 @@ func processLinks(envType string, messages chan string) {
 			}
 		}
 		fmt.Println("All pages processed")
-		time.Sleep(10 * time.Second)
+		time.Sleep(60 * time.Second)
 
 		select {
 			case msg := <-messages:

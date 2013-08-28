@@ -18,6 +18,6 @@ func main() {
 	messages := make(chan string)
 	go readInput(messages)
 
-	envType := "test"
+	envType := "production"
 	processLinks(envType, messages)
 }

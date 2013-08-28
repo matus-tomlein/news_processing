@@ -5,6 +5,8 @@ import "fmt"
 func cachePath(envType string) (string) {
 	if envType == "production" {
 		return "/home/tomlein/webcache"
+	} else if envType == "pi" {
+		return "/data/matus/crawled"
 	}
 	return "/Users/matus/Programming/gocode/bin/data/news_processing"
 }
@@ -41,4 +43,8 @@ func LinkDensityPath(pageId int, envType string) (string) {
 
 func CurrentLinksProcessingIdPath(envType string) (string) {
 	return fmt.Sprintf("%s/links_processing_id.txt", cachePath(envType))
+}
+
+func DownloadedArticlePath(pageId int, hash uint32, envType string) (string) {
+	return fmt.Sprintf("%s/articles/%d/%d.html", cachePath(envType), pageId, hash)
 }

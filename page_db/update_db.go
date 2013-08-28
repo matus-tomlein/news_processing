@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
     "encoding/json"
 	"net/http"
-	"crypto/md5"
 	"github.com/matus-tomlein/news_processing/helpers"
 	"github.com/matus-tomlein/news_processing/environment"
 )
@@ -94,7 +93,7 @@ func CreateOrUpdateDatabase(pageId int, updates []int, ads *AdsFiltering, envTyp
 		if err != nil {
 			panic(err)
 		}
-		stmt, err := tx.Prepare("insert into links (url, images, fontstyle, fontsize, top, left, height, width, inner_text, update_id, file_name, same_domain) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		stmt, err := tx.Prepare("insert into links (url, images, fontstyle, fontsize, top, left, height, width, inner_text, update_id, same_domain) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			panic(err)
 		}
@@ -124,13 +123,9 @@ func CreateOrUpdateDatabase(pageId int, updates []int, ads *AdsFiltering, envTyp
 				continue
 			}
 
-			// Compute hash of url
-			running_hash := md5.New();
-			urlHash := running_hash.Sum([]byte(link.Url));
-
 			// Save to db
 			_, err = stmt.Exec(link.Url, strings.Join(link.Images, "\n"), link.Fontstyle, link.Fontsize,
-				link.Top, link.Left, link.Height, link.Width, link.Text, updateId, urlHash, 1)
+				link.Top, link.Left, link.Height, link.Width, link.Text, updateId, 1)
 			if err != nil {
 				panic(err)
 			}

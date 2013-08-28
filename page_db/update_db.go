@@ -8,15 +8,11 @@ import (
 	"os"
 	"io/ioutil"
     "encoding/json"
+	"net/http"
 	"crypto/md5"
 	"github.com/matus-tomlein/news_processing/helpers"
 	"github.com/matus-tomlein/news_processing/environment"
 )
-
-type UpdateInfo struct {
-	Id int
-	CacheFolderName string
-}
 
 type UpdateLink struct {
 	Text string
@@ -32,8 +28,14 @@ type UpdateLink struct {
 	Width float32
 }
 
+type UpdateRoot struct {
+	PageId int `json:"page_id"`
+	Url string
+	Links []UpdateLink
+}
+
 func GetDatabase(pageId int, envType string) (*sql.DB, error) {
-	filename := environment.PageDbPath(700, envType)
+	filename := environment.PageDbPath(pageId, envType)
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		helpers.CopyFile(filename, environment.PageDbTemplatePath(envType))
 		fmt.Printf("Created database: %s", filename)
@@ -42,7 +44,7 @@ func GetDatabase(pageId int, envType string) (*sql.DB, error) {
 	return sql.Open("sqlite3", filename)
 }
 
-func CreateOrUpdateDatabase(pageId int, pageUrl string, updates []UpdateInfo, ads *AdsFiltering, envType string) {
+func CreateOrUpdateDatabase(pageId int, updates []int, ads *AdsFiltering, envType string) {
 	defer func() {
         if r := recover(); r != nil {
             fmt.Println("Recovered in CreateOrUpdateDatabase", r)
@@ -54,29 +56,38 @@ func CreateOrUpdateDatabase(pageId int, pageUrl string, updates []UpdateInfo, ad
 		panic(err)
 	}
 	defer db.Close()
-	pageDomain := helpers.GetDomain(pageUrl)
+	pageDomain := ""
 
-	for _, update := range updates {
-		updateId := update.Id
+	for _, updateId := range updates {
 		defer func() {
 			if r := recover(); r != nil {
 				fmt.Println("Recovered in update", r)
 			}
 		}()
-
-		filename := environment.UpdateJsonPath(pageId, update.CacheFolderName, envType)
-		if _, err := os.Stat(filename); os.IsNotExist(err) { // Check if exists
-			fmt.Printf("File does not exist: %s", filename)
-			continue
-		}
-		content, err := ioutil.ReadFile(filename)
+		// tutu
+		resp, err := http.Get(environment.UpdateJsonPath(updateId, envType))
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		links := make([]UpdateLink, 0)
-		err = json.Unmarshal(content, &links)
-		if err != nil { panic(err) }
+		defer resp.Body.Close()
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		root := UpdateRoot{}
+		err = json.Unmarshal(content, &root)
+		if err != nil {
+			panic(err)
+		}
+		if root.PageId != pageId { // Check if the update is the same page as requested in func arguments
+			continue
+		}
+		if pageDomain == "" {
+			pageDomain = helpers.GetDomain(root.Url)
+		}
 
 		tx, err := db.Begin()
 		if err != nil {
@@ -93,7 +104,7 @@ func CreateOrUpdateDatabase(pageId int, pageUrl string, updates []UpdateInfo, ad
 		}
 		defer selectStmt.Close()
 
-		for _, link := range links {
+		for _, link := range root.Links {
 			if pageDomain != helpers.GetDomain(link.Url) {
 				continue
 			}

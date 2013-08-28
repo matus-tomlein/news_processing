@@ -12,52 +12,35 @@ import (
 	"github.com/matus-tomlein/news_processing/environment"
 )
 
-func processLinksInUpdates(pageId int, pageUrl string, updates []page_db.UpdateInfo, ads *page_db.AdsFiltering, envType string) {
+func processLinksInUpdates(pageId int, updates []int, ads *page_db.AdsFiltering, envType string) {
 	fmt.Println("Processing page", pageId, "with", len(updates), "updates")
-	page_db.CreateOrUpdateDatabase(pageId, pageUrl, updates, ads, envType)
+	page_db.CreateOrUpdateDatabase(pageId, updates, ads, envType)
 	ld := page_db.NewLinkDensity(pageId, envType)
-	updateIds := make([]int, len(updates))
-	for i, update := range updates {
-		updateIds[i] = update.Id
-	}
-	newUpdates := ld.Update(pageId, updateIds, envType)
+	newUpdates := ld.Update(pageId, updates, envType)
 	ld.RankLinksAndSaveToDb(newUpdates, pageId, envType)
 }
 
 func processUpdatesWithLinksProcessingId(pageId, linksProcessingId int, db *sql.DB, ads *page_db.AdsFiltering, envType string) (int) {
 	currentLinksProcessingIdPath := environment.CurrentLinksProcessingIdPath(envType)
-	updateIds := make([]page_db.UpdateInfo, 0)
+	updateIds := make([]int, 0)
 
-	var pageUrl string
-	rows, err := db.Query("select url from pages where id = $1", pageId)
-	if err != nil { panic(err) }
-	defer rows.Close()
-	if rows.Next() {
-		err = rows.Scan(&pageUrl)
-		if err != nil { panic(err) }
-	} else {
-		fmt.Println("Page", pageId, "not found")
-		return linksProcessingId
-	}
-
-	rows, err = db.Query("select id, page_id, cache_folder_name from updates where links_processing_id = $1", linksProcessingId)
+	rows, err := db.Query("select id, page_id from updates where links_processing_id = $1", linksProcessingId)
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var updateId, updatePageId int
-		var cacheFolderName string
-		err = rows.Scan(&updateId, &updatePageId, &cacheFolderName)
+		err = rows.Scan(&updateId, &updatePageId)
 		if err != nil { panic(err) }
-		updateIds = append(updateIds, page_db.UpdateInfo { updateId, cacheFolderName })
+		updateIds = append(updateIds, updateId)
 		if pageId < 0 { pageId = updatePageId }
 	}
 	if len(updateIds) > 0 {
 		err = ioutil.WriteFile(currentLinksProcessingIdPath, []byte(strconv.Itoa(linksProcessingId)), 0644)
 		if err != nil { panic(err) }
 
-		processLinksInUpdates(pageId, pageUrl, updateIds, ads, envType)
+		processLinksInUpdates(pageId, updateIds, ads, envType)
 
 		err = os.Remove(currentLinksProcessingIdPath)
 		if err != nil { panic(err) }

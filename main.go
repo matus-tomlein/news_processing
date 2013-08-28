@@ -18,9 +18,7 @@ func readInput(messages chan string) {
 func main() {
 	ads := &page_db.AdsFiltering{}
 	ads.Init("test")
-	page_db.CreateOrUpdateDatabase(700, "http://www.boston.com", []page_db.UpdateInfo {
-		{1236, "1371183281-p"},
-	}, ads, "test")
+	page_db.CreateOrUpdateDatabase(700, []int { 717, 10995, 105185,   109233, 109332, 111329 }, ads, "test")
 }
 
 func main1() {

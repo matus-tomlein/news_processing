@@ -24,8 +24,11 @@ func PageDbPath(pageId int, envType string) (string) {
 	return fmt.Sprintf("%s/databases/page_%d.db", cachePath(envType), pageId)
 }
 
-func UpdateJsonPath(pageId int, cacheFolderName string, envType string) (string) {
-	return fmt.Sprintf("%s/parsed/%d/%s.json", cachePath(envType), pageId, cacheFolderName)
+func UpdateJsonPath(updateId int, envType string) (string) {
+	if envType == "production" {
+		return fmt.Sprintf("http://localhost/updates/%d/links.json", updateId)
+	}
+	return fmt.Sprintf("http://calculon.fiit.stuba.sk:60080/updates/%d/links.json", updateId)
 }
 
 func AdsFilteringTxtPath(envType string) (string) {

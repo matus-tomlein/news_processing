@@ -11,7 +11,7 @@ func cachePath(envType string) (string) {
 
 func appPath(envType string) (string) {
 	if envType == "production" {
-		return "/home/tomlein/gocode/src/github.com/matus-tomlein/news_processing"
+		return "/home/tomlein/go/src/github.com/matus-tomlein/news_processing"
 	}
 	return "/Users/matus/Programming/gocode/src/github.com/matus-tomlein/news_processing"
 }

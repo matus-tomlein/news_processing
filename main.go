@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/matus-tomlein/news_processing/page_db"
 )
 
 func readInput(messages chan string) {
@@ -16,15 +15,9 @@ func readInput(messages chan string) {
 }
 
 func main() {
-	ads := &page_db.AdsFiltering{}
-	ads.Init("test")
-	page_db.CreateOrUpdateDatabase(700, []int { 717, 10995, 105185,   109233, 109332, 111329 }, ads, "test")
-}
-
-func main1() {
 	messages := make(chan string)
 	go readInput(messages)
 
-	envType := "test"
+	envType := "production"
 	processLinks(envType, messages)
 }

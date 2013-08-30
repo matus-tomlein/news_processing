@@ -6,7 +6,7 @@ import (
 	"github.com/matus-tomlein/news_processing/environment"
 	"net/http"
 	"io/ioutil"
-    "encoding/json"
+	"encoding/json"
 	"hash/fnv"
 	"time"
 	"os"
@@ -25,12 +25,14 @@ func hash(s string) uint32 {
 
 func DownloadUrl(url string, pageId int, envType string) {
 	fmt.Println("Downloading", url)
+
 	fileName := environment.DownloadedArticlePath(pageId, hash(url), envType)
 
-	cmd := exec.Command("sh", "-c", "curl -L --max-time 60 \"" + url + "\" > " + fileName)
+	cmd := exec.Command("curl", "-L", "--create-dirs", "--max-time", "60", "-o", fileName, url)
 	err := cmd.Run()
+
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Println(err)
 	}
 }
 

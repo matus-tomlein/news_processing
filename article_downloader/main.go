@@ -18,5 +18,5 @@ func main() {
 	messages := make(chan string)
 	go readInput(messages)
 
-	StartDownload("test", messages)
+	StartDownload("pi", messages)
 }

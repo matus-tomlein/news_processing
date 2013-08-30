@@ -48,3 +48,7 @@ func CurrentLinksProcessingIdPath(envType string) (string) {
 func DownloadedArticlePath(pageId int, hash uint32, envType string) (string) {
 	return fmt.Sprintf("%s/articles/%d/%d.html", cachePath(envType), pageId, hash)
 }
+
+func DownloadArticleFolder(envType string, pageId int) (string) {
+	return fmt.Sprintf("%s/articles/%d", cachePath(envType), pageId)
+}

@@ -21,3 +21,5 @@ _testmain.go
 
 *.exe
 news_processing
+links_processor/links_processor
+article_downloader/article_downloader

@@ -132,10 +132,12 @@ func processLinks(envType string, messages chan string) {
 		fmt.Println("All pages processed")
 		time.Sleep(120 * time.Second)
 
-		select {
-			case msg := <-messages:
-				if msg == "q" { os.Exit(0) }
-			default:
+		for i := 0; i < 2; i++ {
+			select {
+				case msg := <-messages:
+					if msg == "q" { os.Exit(0) }
+				default:
+			}
 		}
 	}
 }

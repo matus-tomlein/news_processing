@@ -2,7 +2,7 @@ package environment
 
 import "fmt"
 
-func cachePath(envType string) (string) {
+func CachePath(envType string) (string) {
 	if envType == "production" {
 		return "/home/tomlein/webcache"
 	} else if envType == "pi" {
@@ -11,7 +11,7 @@ func cachePath(envType string) (string) {
 	return "/Users/matus/Programming/gocode/bin/data/news_processing"
 }
 
-func appPath(envType string) (string) {
+func AppPath(envType string) (string) {
 	if envType == "production" {
 		return "/home/tomlein/go/src/github.com/matus-tomlein/news_processing"
 	}
@@ -19,11 +19,11 @@ func appPath(envType string) (string) {
 }
 
 func PageDbTemplatePath(envType string) (string) {
-	return fmt.Sprintf("%s/template.db", appPath(envType))
+	return fmt.Sprintf("%s/template.db", AppPath(envType))
 }
 
 func PageDbPath(pageId int, envType string) (string) {
-	return fmt.Sprintf("%s/databases/page_%d.db", cachePath(envType), pageId)
+	return fmt.Sprintf("%s/databases/page_%d.db", CachePath(envType), pageId)
 }
 
 func UpdateJsonPath(updateId int, envType string) (string) {
@@ -34,21 +34,21 @@ func UpdateJsonPath(updateId int, envType string) (string) {
 }
 
 func AdsFilteringTxtPath(envType string) (string) {
-	return fmt.Sprintf("%s/ads_blacklist.txt", appPath(envType))
+	return fmt.Sprintf("%s/ads_blacklist.txt", AppPath(envType))
 }
 
 func LinkDensityPath(pageId int, envType string) (string) {
-	return fmt.Sprintf("%s/link_densities/%d.json", cachePath(envType), pageId)
+	return fmt.Sprintf("%s/link_densities/%d.json", CachePath(envType), pageId)
 }
 
 func CurrentLinksProcessingIdPath(envType string) (string) {
-	return fmt.Sprintf("%s/links_processing_id.txt", cachePath(envType))
+	return fmt.Sprintf("%s/links_processing_id.txt", CachePath(envType))
 }
 
 func DownloadedArticlePath(pageId int, hash uint32, envType string) (string) {
-	return fmt.Sprintf("%s/articles/%d/%d.html", cachePath(envType), pageId, hash)
+	return fmt.Sprintf("%s/articles/%d/%d.html", CachePath(envType), pageId, hash)
 }
 
 func DownloadArticleFolder(envType string, pageId int) (string) {
-	return fmt.Sprintf("%s/articles/%d", cachePath(envType), pageId)
+	return fmt.Sprintf("%s/articles/%d", CachePath(envType), pageId)
 }

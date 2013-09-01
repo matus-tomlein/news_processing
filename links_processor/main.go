@@ -15,6 +15,11 @@ func readInput(messages chan string) {
 }
 
 func main() {
+	// Create postgres connection
+	db, err := sql.Open("postgres", environment.PostgresConnectionString(envType))
+	if err != nil { panic(err) }
+	defer db.Close()
+
 	messages := make(chan string)
 	go readInput(messages)
 

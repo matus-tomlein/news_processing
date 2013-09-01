@@ -5,6 +5,7 @@ import (
 	"strings"
 	"os"
 	"io"
+	"hash/fnv"
 )
 
 func CopyFile(dst, src string) (int64, error) {
@@ -40,4 +41,20 @@ func GetDomain(url string) (string) {
 	}
 	subArr = append(subArr, arr[len(arr) - 2], arr[len(arr) - 1])
 	return strings.Join(subArr, ".")
+}
+
+func Hash(s string) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(s))
+	return h.Sum32()
+}
+
+func ReadInput(messages chan string) {
+	fmt.Println("Type q to quit")
+	for {
+		var input string
+		_, err := fmt.Scanf("%s", &input)
+		if err != nil { panic(err) }
+		messages <- input
+	}
 }

@@ -27,9 +27,24 @@ func TestDownloadedJson(t *testing.T) {
 	}
 }
 
-func TestDownlaodJsonForBadPage(t *testing.T) {
+func TestDownloadJsonForBadPage(t *testing.T) {
 	_, err := downloadJson(12, "http://today.gm", "test")
 	if err == nil {
+		t.FailNow()
+	}
+}
+
+func TestSaveDownloadedJson(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	cacheFolderName, err = download(pageId, "http://fiit.sk", "test")
+	if err != nil {
+		t.Log("Failed to download update")
+		t.FailNow()
+	}
+	if _, err := os.Stat(cacheFolderName); os.IsNotExist(err) {
+		t.Log("File not found")
 		t.FailNow()
 	}
 }

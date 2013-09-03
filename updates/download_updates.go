@@ -67,6 +67,7 @@ func main() {
 	defer db.Close()
 
 	for {
+		// Select planned updates to execute
 		rows, err := db.Query("select id, page_id, pages.url, pages.priority, num_failed_accesses from planned_updates where execute_after < now() join pages on pages.id = planned_updates.page_id and pages.track = TRUE")
 		if err != nil {
 			panic(err)

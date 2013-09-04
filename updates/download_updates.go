@@ -38,7 +38,7 @@ func download(pageId int, url string, envType string) (string, error) {
 	cacheFolderName := fmt.Sprintf("%d/go.%s", pageId, t.Format("20060102150405"))
 	fileName := fmt.Sprintf("%s/parsed/%s.json", environment.CachePath(envType), cacheFolderName)
 
-	err = os.Mkdir(fmt.Sprintf("%s/parsed/%d", environment.CachePath(envType), pageId), 0777)
+	err = os.MkdirAll(fmt.Sprintf("%s/parsed/%d", environment.CachePath(envType), pageId), 0777)
 	if err != nil { panic(err) }
 	err = ioutil.WriteFile(fileName, out, 0777)
 	if err != nil { panic(err) }
@@ -56,7 +56,7 @@ func updateIntervalForPagePriority(pagePriority int) int {
 }
 
 func main() {
-	envType := "test"
+	envType := environment.Current()
 
 	messages := make(chan string)
 	go helpers.ReadInput(messages)

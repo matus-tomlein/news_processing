@@ -5,6 +5,8 @@ import "fmt"
 func CachePath(envType string) (string) {
 	if envType == "production" {
 		return "/home/tomlein/webcache"
+	} else if envType == "calculon-test" {
+		return "/home/tomlein/webcache-testing"
 	} else if envType == "pi" {
 		return "/data/matus/crawled"
 	}
@@ -12,7 +14,7 @@ func CachePath(envType string) (string) {
 }
 
 func AppPath(envType string) (string) {
-	if envType == "production" {
+	if envType == "production" || envType == "calculon-test" {
 		return "/home/tomlein/go/src/github.com/matus-tomlein/news_processing"
 	}
 	return "/Users/matus/Programming/gocode/src/github.com/matus-tomlein/news_processing"
@@ -27,7 +29,7 @@ func PageDbPath(pageId int, envType string) (string) {
 }
 
 func UpdateJsonPath(updateId int, envType string) (string) {
-	if envType == "production" {
+	if envType == "production" || envType == "calculon-test" {
 		return fmt.Sprintf("http://localhost/updates/%d/links.json", updateId)
 	}
 	return fmt.Sprintf("http://calculon.fiit.stuba.sk:60080/updates/%d/links.json", updateId)

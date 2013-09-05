@@ -68,7 +68,7 @@ func main() {
 
 	for {
 		// Select planned updates to execute
-		rows, err := db.Query("select id, page_id, pages.url, pages.priority, num_failed_accesses from planned_updates where execute_after < now() join pages on pages.id = planned_updates.page_id and pages.track = TRUE")
+		rows, err := db.Query("select id, page_id, pages.url, pages.priority, num_failed_accesses from planned_updates where execute_after < now() join pages on pages.id = planned_updates.page_id and pages.track = TRUE limit 10")
 		if err != nil {
 			panic(err)
 		}
@@ -81,6 +81,7 @@ func main() {
 			if err != nil { panic(err) }
 
 			// download the update
+			fmt.Println("Downloading update for page", pageId)
 			cacheFolderName, err := download(pageId, url, envType)
 
 			if err == nil { // if successful
@@ -114,7 +115,7 @@ func main() {
 
 
 		fmt.Println("Planned updates executed")
-		time.Sleep(120 * time.Second)
+		time.Sleep(60 * time.Second)
 		select {
 			case msg := <-messages:
 				if msg == "q" { os.Exit(0) }

@@ -6,12 +6,12 @@ import (
 	"os/exec"
 	"github.com/matus-tomlein/news_processing/environment"
 	"github.com/matus-tomlein/news_processing/helpers"
-	"github.com/matus-tomlein/news_processing/page_db"
 	"time"
-	"encoding/json"
 	"io/ioutil"
 	_ "github.com/bmizerany/pq"
 	"database/sql"
+	"strings"
+	"errors"
 )
 
 func downloadJson(pageId int, url string, envType string) ([]byte, error) {
@@ -21,13 +21,12 @@ func downloadJson(pageId int, url string, envType string) ([]byte, error) {
 		fmt.Println(err)
 		return make([]byte, 0), err
 	}
-	links := make([]page_db.UpdateLink, 0)
-	err = json.Unmarshal(out, &links)
-	if err != nil {
-		fmt.Println(err)
-		return make([]byte, 0), err
+	outString := string(out)
+	i := strings.Index(outString, "[{")
+	if i < 0 {
+		return make([]byte, 0), errors.New("Failed to process links JSON")
 	}
-	return out, err
+	return []byte(out[i:len(out)]), err
 }
 
 func download(pageId int, url string, envType string) (string, error) {
@@ -68,7 +67,9 @@ func main() {
 
 	for {
 		// Select planned updates to execute
-		rows, err := db.Query("select id, page_id, pages.url, pages.priority, num_failed_accesses from planned_updates where execute_after < now() join pages on pages.id = planned_updates.page_id and pages.track = TRUE limit 10")
+		rows, err := db.Query(`select planned_updates.id, page_id, pages.url, pages.priority, num_failed_accesses
+			from planned_updates join pages on pages.id = planned_updates.page_id and pages.track = TRUE
+			where execute_after < now() limit 10`)
 		if err != nil {
 			panic(err)
 		}
@@ -86,7 +87,8 @@ func main() {
 
 			if err == nil { // if successful
 				// insert into updates
-				_, err = db.Exec("insert into updates (page_id, cache_folder_name, parsed, created_at, updated_at) values (?, ?, TRUE, now(), now())",
+				_, err = db.Exec(`insert into updates (page_id, cache_folder_name, parsed, created_at, updated_at)
+					values ($1, $2, TRUE, now(), now())`,
 					pageId, cacheFolderName)
 				if err != nil { panic(err) }
 
@@ -96,6 +98,7 @@ func main() {
 						pageId)
 					if err != nil { panic(err) }
 				}
+				fmt.Println("Update downloaded for page", pageId, "in folder", cacheFolderName)
 			} else { // if failed to download update, increase num_failed_accesses in pages
 				numFailedAccesses++
 				_, err = db.Exec("update pages set num_failed_accesses = $1 where id = $2",
@@ -108,7 +111,7 @@ func main() {
 			if err != nil { panic(err) }
 
 			// create new planned_update
-			_, err = db.Exec(fmt.Sprintf("insert into planned_updates (execute_after, page_id, created_at, updated_at) values (now() + interval '%d hour', ?, now(), now())", updateIntervalForPagePriority(pagePriority)),
+			_, err = db.Exec(fmt.Sprintf("insert into planned_updates (execute_after, page_id, created_at, updated_at) values (now() + interval '%d hour', $1, now(), now())", updateIntervalForPagePriority(pagePriority)),
 				pageId)
 			if err != nil { panic(err) }
 		}

@@ -89,7 +89,7 @@ func processLinks(envType string, messages chan string) {
 	}
 
 	pageIds := make([]string, 0)
-	rows, err := db.Query("select id from pages where priority >= 5")
+	rows, err := db.Query("select id from pages where priority > 0")
 	if err != nil {
 		panic(err)
 	}

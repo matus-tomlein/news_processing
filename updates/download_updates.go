@@ -12,21 +12,43 @@ import (
 	"database/sql"
 	"strings"
 	"errors"
+	"bytes"
 )
 
 func downloadJson(pageId int, url string, envType string) ([]byte, error) {
-	out, err := exec.Command("phantomjs", fmt.Sprintf("%s/updates/links.js", environment.AppPath(envType)), url).Output()
-
+	done := make(chan error)
+	cmd := exec.Command("phantomjs", fmt.Sprintf("%s/updates/links.js", environment.AppPath(envType)), url)
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Println(err)
-		return make([]byte, 0), err
+		panic(err)
 	}
-	outString := string(out)
-	i := strings.Index(outString, "[{")
-	if i < 0 {
-		return make([]byte, 0), errors.New("Failed to process links JSON")
+	cmd.Start()
+	var out string
+
+	go func() {
+		done <- func() (error) {
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(stdout)
+			out = buf.String()
+			return nil
+		}()
+	}()
+	select {
+	case <-time.After(90 * time.Second):
+		if err := cmd.Process.Kill(); err != nil {
+			panic(err)
+		}
+		<-done // allow goroutine to exit
+		return make([]byte, 0), errors.New("Process timeout, killed")
+	case err := <-done:
+		outString := string(out)
+		i := strings.Index(outString, "[{")
+		if i < 0 {
+			return make([]byte, 0), errors.New("Failed to process links JSON")
+		}
+		return []byte(out[i:len(out)]), err
 	}
-	return []byte(out[i:len(out)]), err
+	return make([]byte, 0), errors.New("Unknown error")
 }
 
 func download(pageId int, url string, envType string) (string, error) {

@@ -30,7 +30,8 @@ func downloadJson(pageId int, url string, envType string) ([]byte, error) {
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(stdout)
 			out = buf.String()
-			return nil
+			err = cmd.Wait()
+			return err
 		}()
 	}()
 	select {

@@ -72,6 +72,8 @@ func updateIntervalForPagePriority(pagePriority int) int {
 	if pagePriority == 10 {
 		return 3
 	} else if pagePriority == 5 {
+		return 6
+	} else if pagePriority == 3 {
 		return 12
 	}
 	return 24

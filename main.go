@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/matus-tomlein/news_processing/environment"
 	"github.com/matus-tomlein/news_processing/helpers"
 	"github.com/matus-tomlein/news_processing/link_search"
 )

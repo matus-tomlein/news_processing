@@ -1,4 +1,4 @@
-package main
+package article_downloader
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type LinkInfo struct {
 	PageId int `json:"page_id"`
 }
 
-func hash(s string) uint32 {
+func Hash(s string) uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))
 	return h.Sum32()
@@ -26,7 +26,7 @@ func hash(s string) uint32 {
 func DownloadUrl(url string, pageId int, envType string) {
 	fmt.Println("Downloading", url)
 
-	fileName := environment.DownloadedArticlePath(pageId, hash(url), envType)
+	fileName := environment.DownloadedArticlePath(pageId, Hash(url), envType)
 
 	cmd := exec.Command("curl", "-L", "--create-dirs", "--max-time", "60", "-o", fileName, url)
 	err := cmd.Run()

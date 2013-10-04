@@ -6,6 +6,7 @@ import (
 	"os"
 	"io"
 	"hash/fnv"
+	"bufio"
 )
 
 func CopyFile(dst, src string) (int64, error) {
@@ -51,10 +52,10 @@ func Hash(s string) uint32 {
 
 func ReadInput(messages chan string) {
 	fmt.Println("Type q to quit")
+	bio := bufio.NewReader(os.Stdin)
 	for {
-		var input string
-		_, err := fmt.Scanf("%s", &input)
+		input, _, err := bio.ReadLine()
 		if err != nil { panic(err) }
-		messages <- input
+		messages <- string(input)
 	}
 }

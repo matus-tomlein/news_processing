@@ -26,3 +26,5 @@ article_downloader/article_downloader
 updates/updates
 
 environment/current.go
+
+*.swp

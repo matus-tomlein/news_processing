@@ -14,6 +14,7 @@ import (
 )
 
 type SearchResult struct {
+	LinkId uint32
 	Title string
 	Url string
 	UpdateId int
@@ -43,6 +44,7 @@ func SearchPageDb(pageId int, query, pageUrl, envType string) ([]*SearchResult) 
 		if err != nil { panic(err) }
 
 		searchResult := &SearchResult {
+			LinkId: helpers.Hash(url),
 			Title: title,
 			Url: url,
 			UpdateId: updateId,

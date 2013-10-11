@@ -3,6 +3,7 @@ package link_search
 import (
 	"fmt"
 	"github.com/matus-tomlein/news_processing/page_db"
+	"github.com/matus-tomlein/news_processing/helpers"
 	"github.com/matus-tomlein/news_processing/environment"
 	_ "github.com/bmizerany/pq"
 	"database/sql"

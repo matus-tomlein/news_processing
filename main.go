@@ -21,6 +21,7 @@ func main() {
 		fmt.Println("1 - Link search")
 		fmt.Println("2 - Web server")
 		fmt.Println("3 - Article downloader")
+		fmt.Println("4 - Dump links")
 		var i int
 		_, err := fmt.Scanf("%d", &i)
 		if err != nil {
@@ -39,6 +40,14 @@ func main() {
 
 		case 3:
 			article_downloader.StartDownload(environment.Current(), getMessagesChan())
+			return
+
+		case 4:
+			fmt.Println("Enter path")
+			var path string
+			_, err := fmt.Scanf("%s", &path)
+			if err != nil { panic(err) }
+			page_db.DumpLinks(path, environment.Current())
 			return
 		}
 	}

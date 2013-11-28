@@ -21,6 +21,8 @@ func main() {
 		fmt.Println("1 - Link search")
 		fmt.Println("2 - Web server")
 		fmt.Println("3 - Article downloader")
+		fmt.Println("4 - Latest links")
+
 		var i int
 		_, err := fmt.Scanf("%d", &i)
 		if err != nil {
@@ -40,6 +42,11 @@ func main() {
 		case 3:
 			article_downloader.StartDownload(environment.Current(), getMessagesChan())
 			return
+
+		case 4:
+			link_search.FindLatestLinks()
+			return
+
 		}
 	}
 }

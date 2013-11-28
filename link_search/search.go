@@ -24,6 +24,23 @@ type SearchResult struct {
 	CreatedAt time.Time
 }
 
+func getLinksFromPageUpdates(pageId int, pageUrl, updates string, updatesCreatedAt map[int]time.Time, searchResults []*SearchResult, envType string) ([]*SearchResult) {
+	db, err := page_db.GetDatabase(pageId, envType)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("select url, update_id, inner_text from links where update_id in (" + updates + ")")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	return getSearchResults(rows, updatesCreatedAt, searchResults, pageId, pageUrl)
+
+}
+
 func SearchPageDb(pageId int, query, pageUrl, envType string) ([]*SearchResult) {
 	db, err := page_db.GetDatabase(pageId, envType)
 	if err != nil {
@@ -37,11 +54,16 @@ func SearchPageDb(pageId int, query, pageUrl, envType string) ([]*SearchResult) 
 		panic(err)
 	}
 	defer rows.Close()
+
+	return getSearchResults(rows, nil, searchResults, pageId, pageUrl)
+}
+
+func getSearchResults(rows *sql.Rows, updatesCreatedAt map[int]time.Time, searchResults []*SearchResult, pageId int, pageUrl string) ([]*SearchResult) {
 	for rows.Next() {
 		var url, title string
 		var updateId int
 
-		err = rows.Scan(&url, &updateId, &title)
+		err := rows.Scan(&url, &updateId, &title)
 		if err != nil { panic(err) }
 
 		searchResult := &SearchResult {
@@ -51,6 +73,9 @@ func SearchPageDb(pageId int, query, pageUrl, envType string) ([]*SearchResult) 
 			UpdateId: updateId,
 			PageId: pageId,
 			PageUrl: pageUrl,
+		}
+		if updatesCreatedAt != nil {
+			searchResult.CreatedAt = updatesCreatedAt[updateId]
 		}
 		searchResults = append(searchResults, searchResult)
 	}
@@ -87,6 +112,51 @@ func SearchAllDbs(query, envType string) ([]*SearchResult) {
 	}
 	return searchResults
 
+}
+
+func FindLatestLinks() {
+	envType := environment.Current()
+
+	// Create postgres connection
+	db, err := sql.Open("postgres", environment.PostgresConnectionString(envType))
+	if err != nil { panic(err) }
+	defer db.Close()
+
+	searchResults := make([]*SearchResult, 0)
+	pageUpdates := make(map[int]string)
+	pageUrls := make(map[int]string)
+	updatesCreatedAt := make(map[int]time.Time)
+
+	// Select planned updates to execute
+	rows, err := db.Query(`SELECT updates.id AS update_id, pages.id AS page_id, pages.url AS url, updates.created_at FROM updates JOIN pages ON pages.id = updates.page_id AND pages.priority >= 5 WHERE updates.created_at > now() - '3 days'::interval AND parsed = TRUE ORDER BY page_id;`)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var updateId, pageId int
+		var url string
+		var createdAt time.Time
+
+		err = rows.Scan(&updateId, &pageId, &url, &createdAt)
+		if err != nil {
+			panic(err)
+		}
+
+		if _, ok := pageUpdates[pageId]; ok {
+			pageUpdates[pageId] = strings.Join([]string{ pageUpdates[pageId], strconv.Itoa(updateId) }, ",")
+		} else {
+			pageUpdates[pageId] = strconv.Itoa(updateId)
+		}
+		pageUrls[pageId] = url
+		updatesCreatedAt[updateId] = createdAt
+	}
+
+	for pageId, updates := range pageUpdates {
+		searchResults = getLinksFromPageUpdates(pageId, pageUrls[pageId], updates, updatesCreatedAt, searchResults, envType)
+	}
+
+	outputResults(searchResults)
 }
 
 func Search(query string) {
@@ -127,7 +197,10 @@ func StartSearch(messages chan string) {
 	for _, result := range searchResults {
 		result.CreatedAt = updateDates[result.UpdateId]
 	}
+	outputResults(searchResults)
+}
 
+func outputResults(searchResults []*SearchResult) {
 	b, err := json.Marshal(searchResults)
 	if err != nil { panic(err) }
 

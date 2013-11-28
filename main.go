@@ -22,6 +22,7 @@ func main() {
 		fmt.Println("2 - Web server")
 		fmt.Println("3 - Article downloader")
 		fmt.Println("4 - Latest links")
+		fmt.Println("5 - Dump links")
 
 		var i int
 		_, err := fmt.Scanf("%d", &i)
@@ -47,6 +48,13 @@ func main() {
 			link_search.FindLatestLinks()
 			return
 
+		case 5:
+			fmt.Println("Enter path")
+			var path string
+			_, err := fmt.Scanf("%s", &path)
+			if err != nil { panic(err) }
+			page_db.DumpLinks(path, environment.Current())
+			return
 		}
 	}
 }

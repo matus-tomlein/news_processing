@@ -7,6 +7,8 @@ import (
 	"github.com/matus-tomlein/news_processing/link_search"
 	"github.com/matus-tomlein/news_processing/web_server"
 	"github.com/matus-tomlein/news_processing/article_downloader"
+	"github.com/matus-tomlein/news_processing/page_db"
+
 )
 
 func getMessagesChan() (chan string) {

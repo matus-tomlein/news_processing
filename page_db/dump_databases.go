@@ -3,11 +3,13 @@ package page_db;
 import (
 	"database/sql"
 	"github.com/matus-tomlein/news_processing/helpers"
+	"github.com/matus-tomlein/news_processing/environment"
 	_ "github.com/bmizerany/pq"
     "fmt"
     "io"
     "os"
     "strconv"
+    "strings"
 )
 
 func DumpLinks(path, envType string) {
@@ -59,10 +61,9 @@ func DumpLinks(path, envType string) {
 
 			linkId := helpers.Hash(linkUrl)
 
-			s := []string{strconv.Itoa(pageId), " ", strconv.Itoa(linkId), " ", linkUrl, "\n"};
-			fmt.Printf(strings.Join(s, ""));
+			s := []string{strconv.Itoa(pageId), " ", fmt.Sprintf("%d", linkId), " ", linkUrl, "\n"};
 
-			n, err := io.WriteString(file, s)
+			n, err := io.WriteString(file, strings.Join(s, ""))
 			if err != nil {
 				fmt.Println(n, err)
 			}
